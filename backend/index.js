@@ -1,40 +1,16 @@
-// index.js
 const express = require("express");
-const admin = require("firebase-admin");
+const cors = require("cors");
+const userRoutes = require("./routes/users");
 
-// Load the service account key JSON file
-const serviceAccount = require("./serviceAccountKey.json");
-
-// Initialize the Firebase Admin SDK
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  // Optionally, if you use other Firebase services, you can add additional config here.
-});
-
-// Get a Firestore instance
-const db = admin.firestore();
-
-// Initialize Express app
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(cors());
+app.use(express.json()); // Middleware to parse JSON requests
 
-// Test endpoint to fetch all users from the "users" collection
-app.get("/users", async (req, res) => {
-  try {
-    const usersSnapshot = await db.collection("users").get();
-    const users = [];
-    usersSnapshot.forEach(doc => {
-      users.push({ id: doc.id, ...doc.data() });
-    });
-    res.json(users);
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    res.status(500).send("Error fetching users");
-  }
-});
+// Routes
+app.use("/users", userRoutes);
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
