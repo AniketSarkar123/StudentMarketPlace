@@ -30,21 +30,21 @@ const addUser = async (username, usermail, password) => {
 module.exports = { addUser };
 
 // Function to login a user by email and password
-const loginUser = async (usermail, password) => {
-  const snapshot = await usersCollection.where("usermail", "==", usermail).get();
+// const loginUser = async (usermail, password) => {
+//   const snapshot = await usersCollection.where("usermail", "==", usermail).get();
 
-  if (snapshot.empty) {
-    return null; // No user found
-  }
+//   if (snapshot.empty) {
+//     return null; // No user found
+//   }
 
-  const userDoc = snapshot.docs[0];
-  const user = userDoc.data();
+//   const userDoc = snapshot.docs[0];
+//   const user = userDoc.data();
 
-  if (user.password !== password) {
-    return null; // Incorrect password
-  }
+//   if (user.password !== password) {
+//     return null; // Incorrect password
+//   }
 
-  return user; // Return the user data if password matches
-};
+//   return user; // Return the user data if password matches
+// };
 
-module.exports = { loginUser };
+// module.exports = { loginUser };
