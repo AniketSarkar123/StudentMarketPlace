@@ -1,5 +1,5 @@
 const express = require("express");
-const { addUser } = require("../models/userModel");
+const { addUser, loginUserByUsername } = require("../models/userModel");
 
 const router = express.Router();
 
@@ -7,49 +7,26 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
   try {
     const { username, usermail, password } = req.body;
-
+    
+    // Validate required fields
     if (!username || !usermail || !password) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
+    // Create new user
     const newUser = await addUser(username, usermail, password);
-    res.status(201).json({ message: "User registered successfully", user: newUser });
+    return res.status(201).json({ message: "User registered successfully", user: newUser });
   } catch (error) {
     console.error("Error registering user:", error);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// module.exports = router;
-
-// Route: Login user
+// Route: Login a user using username and password
 router.post("/login", async (req, res) => {
-  try {
-    const { usermail, password } = req.body;
-
-    if (!usermail || !password) {
-      return res.status(400).json({ error: "Both usermail and password are required" });
-    }
-
-    const user = await loginUser(usermail, password);
-
-    if (!user) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    res.status(200).json({
-      message: "Login successful",
-      user: {
-        userId: user.userId,
-        username: user.username,
-        usermail: user.usermail,
-        ballance: user.ballance,
-      },
-    });
-  } catch (error) {
-    console.error("Error logging in user:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
+  // Call the loginUserByUsername function from userModel.
+  // This function handles validation, setting the cookie, and sending the response.
+  return loginUserByUsername(req, res);
 });
 
 module.exports = router;

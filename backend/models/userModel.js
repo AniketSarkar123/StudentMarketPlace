@@ -26,25 +26,41 @@ const addUser = async (username, usermail, password) => {
   await usersCollection.doc(userId.toString()).set(newUser);
   return newUser;
 };
+const loginUserByUsername = async (req, res) => {
+  try {
+    const { username, password } = req.body;
 
-module.exports = { addUser };
+    // Validate input
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password are required" });
+    }
 
-// Function to login a user by email and password
-// const loginUser = async (usermail, password) => {
-//   const snapshot = await usersCollection.where("usermail", "==", usermail).get();
+    // Query the Firestore collection for a document with the given username
+    const snapshot = await usersCollection.where("username", "==", username).get();
 
-//   if (snapshot.empty) {
-//     return null; // No user found
-//   }
+    // If no user found, return an error
+    if (snapshot.empty) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-//   const userDoc = snapshot.docs[0];
-//   const user = userDoc.data();
+    // Assuming usernames are unique, get the first matching document
+    const userDoc = snapshot.docs[0];
+    const user = userDoc.data();
 
-//   if (user.password !== password) {
-//     return null; // Incorrect password
-//   }
+    // Verify password
+    if (user.password !== password) {
+      return res.status(401).json({ error: "Incorrect password" });
+    }
 
-//   return user; // Return the user data if password matches
-// };
+    // Set a cookie with all user information (converted to a JSON string)
+    // For security, we mark the cookie as httpOnly to prevent client-side script access.
+    res.cookie("userInfo", JSON.stringify(user) , { httpOnly: false });
 
-// module.exports = { loginUser };
+    // Respond with a success message and the user data
+    return res.status(200).json({ message: "Login successful", user });
+  } catch (error) {
+    console.error("Error during login:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+module.exports = { addUser, loginUserByUsername };
