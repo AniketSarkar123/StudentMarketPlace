@@ -10,9 +10,9 @@ function getCookie(name) {
   return null;
 }
 
-function AddItem() {
+function EditItem() {
   const [formData, setFormData] = useState({
-    name: '',         // New field for product name
+    name: '',         // Identifier for the product to edit
     category: '',
     condition: '',
     grade: '',
@@ -36,27 +36,27 @@ function AddItem() {
     setSelectedFiles(Array.from(e.target.files));
   };
 
-  // Handle form submission
+  // Handle form submission for editing an item
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Upload images to Firebase Storage and retrieve URLs.
-      const imageUrls = await uploadImages(selectedFiles);
-      console.log('Uploaded image URLs:', imageUrls);
+      // Upload images if any are selected.
+      let imageUrls = [];
+      if (selectedFiles.length > 0) {
+        imageUrls = await uploadImages(selectedFiles);
+        console.log('Uploaded image URLs:', imageUrls);
+      }
 
       // Get the logged in user's info from cookie and parse it.
       const rawUserInfo = getCookie("userInfo");
       let ownerId;
-
       if (!rawUserInfo) {
         console.error("No user info cookie found!");
       } else {
         try {
-          // Decode and parse the cookie value
           const userInfo = JSON.parse(decodeURIComponent(rawUserInfo));
-          // Extract the owner id (assuming it's stored as userId)
           ownerId = userInfo.userId;
           console.log("Owner ID:", ownerId);
         } catch (error) {
@@ -64,21 +64,24 @@ function AddItem() {
         }
       }
       const owner_id = Number(ownerId);
-      // Prepare the payload using proper data types.
+
+      // Prepare the payload. Only include new images if uploaded.
       const payload = {
-        name: formData.name,               // New product name field
+        name: formData.name,               // Identifier used to locate the item
         category: formData.category,
         condition: formData.condition,
         grade: formData.grade,
         subject: formData.subject,
         price: Number(formData.price),
-        images: imageUrls,                 // Array of image URLs
-        owner_id,                         // Taken from the user cookie
+        owner_id,                         // From cookie
       };
+      if (imageUrls.length > 0) {
+        payload.images = imageUrls;
+      }
 
-      // Send the payload to the backend API.
-      const response = await fetch('http://localhost:3000/items/add', {
-        method: 'POST',
+      // Send the payload to the backend API for editing.
+      const response = await fetch('http://localhost:3000/items/edit', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
@@ -86,9 +89,9 @@ function AddItem() {
       const data = await response.json();
       if (!response.ok) {
         console.log(data);
-        toast.error(data.error || 'Error adding item');
+        toast.error(data.error || 'Error editing item');
       } else {
-        toast.success('Item added successfully!');
+        toast.success('Item updated successfully!');
         // Optionally, reset form fields
         setFormData({
           name: '',
@@ -102,7 +105,7 @@ function AddItem() {
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error('An error occurred while adding the item');
+      toast.error('An error occurred while editing the item');
     } finally {
       setLoading(false);
     }
@@ -110,17 +113,18 @@ function AddItem() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Add New Item</h1>
+      <h1 className="text-2xl font-bold mb-4">Edit Item</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Field to identify which item to edit */}
         <div>
-          <label className="block mb-1">Name</label>
+          <label className="block mb-1">Name (Identifier)</label>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
             className="w-full p-2 border rounded"
-            placeholder="Enter product name"
+            placeholder="Enter product name to edit"
           />
         </div>
         <div>
@@ -179,7 +183,7 @@ function AddItem() {
           />
         </div>
         <div>
-          <label className="block mb-1">Images</label>
+          <label className="block mb-1">New Images (Optional)</label>
           <input
             id="images"
             type="file"
@@ -194,7 +198,7 @@ function AddItem() {
           >
             {selectedFiles.length > 0
               ? `${selectedFiles.length} file(s) selected`
-              : 'Select Images'}
+              : 'Select New Images'}
           </label>
         </div>
         <button
@@ -204,11 +208,11 @@ function AddItem() {
             loading ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
-          {loading ? 'Adding...' : 'Add Item'}
+          {loading ? 'Updating...' : 'Update Item'}
         </button>
       </form>
     </div>
   );
 }
 
-export default AddItem;
+export default EditItem;

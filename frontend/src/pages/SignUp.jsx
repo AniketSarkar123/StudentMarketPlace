@@ -1,19 +1,52 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 function SignUp() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    university: ''
+    confirmPassword: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.success('Sign up functionality will be implemented soon!');
+
+    // Ensure passwords match
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match!");
+      return;
+    }
+
+    // Prepare payload: fullName is used as username, email as usermail
+    const payload = {
+      username: formData.fullName,
+      usermail: formData.email,
+      password: formData.password
+    };
+
+    try {
+      const response = await fetch('http://localhost:3000/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.error || 'Error signing up');
+      } else {
+        toast.success(data.message || 'Sign up successful');
+        // Optionally redirect to login
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error("Error during sign up:", error);
+      toast.error("An error occurred during sign up.");
+    }
   };
 
   const handleChange = (e) => {
@@ -48,7 +81,7 @@ function SignUp() {
                 required
                 value={formData.fullName}
                 onChange={handleChange}
-                className="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="mt-1 appearance-none rounded-md block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="John Doe"
               />
             </div>
@@ -64,12 +97,10 @@ function SignUp() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="mt-1 appearance-none rounded-md block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="student@university.edu"
               />
             </div>
-
-            
             
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
@@ -82,11 +113,11 @@ function SignUp() {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="mt-1 appearance-none rounded-md block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="••••••••"
               />
             </div>
-
+            
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                 Confirm Password
@@ -98,7 +129,7 @@ function SignUp() {
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="mt-1 appearance-none rounded-md block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="••••••••"
               />
             </div>

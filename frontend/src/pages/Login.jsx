@@ -36,7 +36,7 @@ function Login() {
         // Manually set the cookie (accessible via JavaScript)
   // This example stores the user info in a cookie named "userInfo".
   document.cookie = `userInfo=${encodeURIComponent(JSON.stringify(data.user))}; path=/;`;
-        navigate('/dashboard');
+        navigate('/home');
       }
     } catch (error) {
       console.error('Error during login:', error);

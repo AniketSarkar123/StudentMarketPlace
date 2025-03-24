@@ -5,16 +5,17 @@ const itemsCollection = db.collection("items");
 
 // Function to add a new item
 // The reviews field is left as an empty array.
-const addItem = async (category, condition, grade, subject, owner_id, price, images) => {
+const addItem = async (category, condition, grade, subject, name, owner_id, price, images) => {
   const newItem = {
-    category,              // string
-    condition,             // string
-    grade,                 // string
-    subject,               // string
-    owner_id: Number(owner_id), // number
-    price: Number(price),       // number
-    images,                // array of strings (URLs)
-    reviews: []            // reviews left blank as an empty array
+    category,                     // string
+    condition,                    // string
+    grade,                        // string
+    subject,                      // string
+    name,                         // additional attribute: product name
+    owner_id: Number(owner_id),   // number
+    price: Number(price),         // number
+    images,                       // array of strings (URLs)
+    reviews: []                   // reviews left blank as an empty array
   };
 
   // Add a new document to the items collection
@@ -22,4 +23,29 @@ const addItem = async (category, condition, grade, subject, owner_id, price, ima
   return { id: docRef.id, ...newItem };
 };
 
-module.exports = { addItem };
+const getAllItems = async () => {
+  const snapshot = await itemsCollection.get();
+  const items = [];
+  snapshot.forEach(doc => {
+    items.push({ id: doc.id, ...doc.data() });
+  });
+  return items;
+};
+
+// Function to edit an item using its 'name' as an identifier.
+// It updates the fields provided in updatedData.
+const editItem = async (name, updatedData) => {
+  // Query the collection for an item with the matching name.
+  const querySnapshot = await itemsCollection.where("name", "==", name).get();
+  if (querySnapshot.empty) {
+    throw new Error("Item not found");
+  }
+  // Update the first document found.
+  const docRef = querySnapshot.docs[0].ref;
+  await docRef.update(updatedData);
+  // Retrieve and return the updated document.
+  const updatedDoc = await docRef.get();
+  return { id: updatedDoc.id, ...updatedDoc.data() };
+};
+
+module.exports = { addItem, getAllItems, editItem };

@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import AddItem from './components/addItem.jsx'; // Adjust path if needed
-
+import EditItem from './pages/Edit.jsx';
 function App() {
   return (
     <Router>
@@ -16,7 +16,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/add-item" element={<AddItem />} />
+          <Route path="/edit" element={<EditItem />} />
         </Routes>
         <Toaster position="bottom-right" />
       </div>
