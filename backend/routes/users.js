@@ -1,5 +1,5 @@
 const express = require("express");
-const { addUser, loginUserByUsername } = require("../models/userModel");
+const { addUser, loginUserByUsername, updateUser } = require("../models/userModel");
 
 const router = express.Router();
 
@@ -24,9 +24,32 @@ router.post("/register", async (req, res) => {
 
 // Route: Login a user using username and password
 router.post("/login", async (req, res) => {
-  // Call the loginUserByUsername function from userModel.
-  // This function handles validation, setting the cookie, and sending the response.
   return loginUserByUsername(req, res);
+});
+
+// New Update Route: Update email, password, and optionally about for the logged-in user
+router.put("/update", async (req, res) => {
+  try {
+    const { email, password, about } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    // Retrieve user info from cookie
+    const rawUserInfo = req.cookies.userInfo;
+    if (!rawUserInfo) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+    const user = JSON.parse(rawUserInfo);
+    const userId = user.userId;
+
+    // Update user document
+    const updatedUser = await updateUser(userId, email, password, about);
+    return res.status(200).json({ message: "User updated successfully", user: updatedUser });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 module.exports = router;

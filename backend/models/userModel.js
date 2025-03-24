@@ -26,6 +26,7 @@ const addUser = async (username, usermail, password) => {
   await usersCollection.doc(userId.toString()).set(newUser);
   return newUser;
 };
+
 const loginUserByUsername = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -53,8 +54,7 @@ const loginUserByUsername = async (req, res) => {
     }
 
     // Set a cookie with all user information (converted to a JSON string)
-    // For security, we mark the cookie as httpOnly to prevent client-side script access.
-    res.cookie("userInfo", JSON.stringify(user) , { httpOnly: false });
+    res.cookie("userInfo", JSON.stringify(user), { httpOnly: false });
 
     // Respond with a success message and the user data
     return res.status(200).json({ message: "Login successful", user });
@@ -63,4 +63,21 @@ const loginUserByUsername = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
-module.exports = { addUser, loginUserByUsername };
+
+// New function to update a user's email, password, and optionally about
+const updateUser = async (userId, email, password, about) => {
+  const userRef = usersCollection.doc(userId.toString());
+  const updateData = { 
+    usermail: email,   // updating the email field (using the same field name as in addUser)
+    password 
+  };
+  // Optionally update the about field if provided
+  if (about !== undefined) {
+    updateData.about = about;
+  }
+  await userRef.update(updateData);
+  const updatedDoc = await userRef.get();
+  return updatedDoc.data();
+};
+
+module.exports = { addUser, loginUserByUsername, updateUser };

@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import AddItem from './components/addItem.jsx'; // Adjust path if needed
 import EditItem from './pages/Edit.jsx';
+import Profile from './pages/Profile.jsx';
 function App() {
   return (
     <Router>
@@ -19,6 +20,7 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/add-item" element={<AddItem />} />
           <Route path="/edit" element={<EditItem />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
         <Toaster position="bottom-right" />
       </div>
