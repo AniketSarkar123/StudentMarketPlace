@@ -19,7 +19,7 @@ function Login() {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // important to include cookies in request/response
+        credentials: 'include', // Ensure cookies are sent and received
         body: JSON.stringify({
           username: formData.username,
           password: formData.password,
@@ -32,10 +32,8 @@ function Login() {
         toast.error(data.error || 'Login failed');
       } else {
         toast.success(data.message || 'Login successful');
-        // Optionally, redirect the user to another page after successful login
-        // Manually set the cookie (accessible via JavaScript)
-  // This example stores the user info in a cookie named "userInfo".
-  document.cookie = `userInfo=${encodeURIComponent(JSON.stringify(data.user))}; path=/;`;
+        // Set the authentication cookie manually (if your backend doesn't do it automatically)
+        document.cookie = `userInfo=${encodeURIComponent(JSON.stringify(data.user))}; path=/;`;
         navigate('/home');
       }
     } catch (error) {

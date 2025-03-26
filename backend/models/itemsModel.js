@@ -48,4 +48,5 @@ const editItem = async (name, updatedData) => {
   return { id: updatedDoc.id, ...updatedDoc.data() };
 };
 
-module.exports = { addItem, getAllItems, editItem };
+
+module.exports = { addItem, getAllItems, editItem, itemsCollection: db.collection("items") };

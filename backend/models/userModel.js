@@ -80,4 +80,9 @@ const updateUser = async (userId, email, password, about) => {
   return updatedDoc.data();
 };
 
-module.exports = { addUser, loginUserByUsername, updateUser };
+// 
+// userModel.js
+// ... existing code ...
+
+module.exports = { addUser, loginUserByUsername, updateUser, usersCollection: db.collection("users") };
+

@@ -66,6 +66,7 @@
 const express = require("express");
 const { addItem, getAllItems, editItem } = require("../models/itemsModel");
 const router = express.Router();
+const {isAuthenticated} = require("../middlewares/authware.js");
 
 // Route: Add a new item
 router.post("/add", async (req, res) => {
