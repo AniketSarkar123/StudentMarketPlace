@@ -8,23 +8,30 @@ import SignUp from './pages/SignUp';
 import AddItem from './components/addItem.jsx'; // Adjust path if needed
 import EditItem from './pages/Edit.jsx';
 import Profile from './pages/Profile.jsx';
+import Cart from './pages/Cart.jsx'; // New Cart page
+import { CartProvider } from './context/CartContext'; // New Cart context provider
+import Delivery from './pages/Delivery.jsx';
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<SignUp/>} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/add-item" element={<AddItem />} />
-          <Route path="/edit" element={<EditItem />} />
-          <Route path="/profile" element={<Profile />} />
-        </Routes>
-        <Toaster position="bottom-right" />
-      </div>
-    </Router>
+    <CartProvider>
+      <Router>
+        <div className="min-h-screen bg-gray-50">
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<SignUp />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/add-item" element={<AddItem />} />
+            <Route path="/edit" element={<EditItem />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/delivery" element={<Delivery />} />
+          </Routes>
+          <Toaster position="bottom-right" />
+        </div>
+      </Router>
+    </CartProvider>
   );
 }
 

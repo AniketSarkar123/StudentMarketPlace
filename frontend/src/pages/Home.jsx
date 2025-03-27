@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-
+import { useCart } from '../context/CartContext';
 // Helper to retrieve a cookie by name
 function getCookie(name) {
   const value = `; ${document.cookie}`;
@@ -23,6 +23,7 @@ function Home() {
   const [selectedItem, setSelectedItem] = useState(null); // detail view for one item
   const [reviewsVisibility, setReviewsVisibility] = useState({});
   const [ownerId, setOwnerId] = useState(null);
+  const { addItemToCart } = useCart();
   const navigate = useNavigate();
 
   // On mount: parse cookie to get user info
@@ -327,7 +328,19 @@ function Home() {
                     EDIT
                   </button>
                 ) : (
-                  <button className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">
+                  <button
+                    className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+                    onClick={() => {
+                      // Add the item to the cart using context
+                      addItemToCart({
+                        name: item.name,
+                        quantity: 1,
+                        price: item.price,
+                        sellerId: item.owner_id,
+                      });
+                      toast.success("Added to cart successfully!");
+                    }}
+                  >
                     Add to Cart
                   </button>
                 )}

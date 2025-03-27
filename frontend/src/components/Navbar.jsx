@@ -308,6 +308,12 @@ function Navbar() {
                 >
                   Add Item
                 </Link>
+                <Link to="/cart" className={`${isActive('/add-item')} px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200`}>
+                  View Cart
+                </Link>
+                <Link to="/delivery" className={`${isActive('/add-item')} px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200`}>
+                Delivery
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors duration-200"
