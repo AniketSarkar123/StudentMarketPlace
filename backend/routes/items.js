@@ -64,6 +64,8 @@
 // module.exports = router;
 // items.js
 const express = require("express");
+const db = require("../config/firebase"); // Firestore instance
+
 const { addItem, getAllItems, editItem } = require("../models/itemsModel");
 const router = express.Router();
 const {isAuthenticated} = require("../middlewares/authware.js");
@@ -141,6 +143,43 @@ router.put("/edit", async (req, res) => {
     return res.status(200).json({ message: "Item updated successfully", item: updatedItem });
   } catch (error) {
     console.error("Error editing item:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+router.post("/add_comment", async (req, res) => {
+  try {
+    const { comments } = req.body;
+    if (!comments || !Array.isArray(comments) || comments.length === 0) {
+      return res.status(400).json({ error: "A non-empty array of comments is required" });
+    }
+    
+    // Process each comment
+    const results = await Promise.all(
+      comments.map(async (commentObj) => {
+        const { name, comment } = commentObj;
+        if (!name || !comment) {
+          return { name, error: "Missing name or comment" };
+        }
+        
+        // Query for item with matching name
+        const snapshot = await db.collection("items").where("name", "==", name).get();
+        if (snapshot.empty) {
+          return { name, error: "Item not found" };
+        }
+        
+        // Update the first matching item by appending the comment
+        const docRef = snapshot.docs[0].ref;
+        const currentReviews = snapshot.docs[0].data().reviews || [];
+        const updatedReviews = [...currentReviews, comment];
+        await docRef.update({ reviews: updatedReviews });
+        
+        return { name, message: "Comment added" };
+      })
+    );
+    
+    return res.status(200).json({ results });
+  } catch (error) {
+    console.error("Error adding comments:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 });

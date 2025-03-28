@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
+import { Link, useNavigate } from 'react-router-dom';
 
 // Helper to get a cookie by name
 function getCookie(name) {
@@ -46,7 +47,7 @@ function Cart() {
       return;
     }
     const user = JSON.parse(decodeURIComponent(rawUserInfo));
-
+    const navigate = useNavigate();
     if (user.balance < totalPrice) {
       toast.error("Insufficient balance to complete the order.");
       return;
@@ -62,7 +63,7 @@ function Cart() {
           seller_id: item.sellerId
         })),
         total_price: totalPrice,
-        user_id: user.userId
+        user_id: String(user.userId)
       };
 
       const orderResponse = await fetch("http://localhost:3000/orders/add", {
@@ -78,11 +79,12 @@ function Cart() {
       }
 
       // Deduct the order total using the update_bal endpoint.
-      const balanceResponse = await fetch("http://localhost:3000/users/update_bal", {
+      const balanceResponse = await fetch("http://localhost:3000/users/add_balance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ spent: totalPrice })
+        body: JSON.stringify({  userId: user.userId,
+          amount: -totalPrice })
       });
       const balanceResult = await balanceResponse.json();
       if (!balanceResponse.ok) {
@@ -91,14 +93,13 @@ function Cart() {
       }
 
       toast.success("Order placed successfully!");
-      clearCart();
+      navigate("/comments")
+      // clearCart();
       setOrderMode(false);
       setDeliveryAddress("");
 
       // Update the cookie with the new balance by merging with the existing user info.
-      document.cookie = `userInfo=${encodeURIComponent(
-        JSON.stringify({ ...user, balance: balanceResult.balance })
-      )}; path=/;`;
+     
     } catch (error) {
       console.error("Order error:", error);
       toast.error("An error occurred while placing the order.");

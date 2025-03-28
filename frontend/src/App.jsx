@@ -11,6 +11,7 @@ import Profile from './pages/Profile.jsx';
 import Cart from './pages/Cart.jsx'; // New Cart page
 import { CartProvider } from './context/CartContext'; // New Cart context provider
 import Delivery from './pages/Delivery.jsx';
+import Comments from './pages/Comments.jsx';
 function App() {
   return (
     <CartProvider>
@@ -27,6 +28,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/delivery" element={<Delivery />} />
+            <Route path="/comments" element={<Comments />} />
           </Routes>
           <Toaster position="bottom-right" />
         </div>

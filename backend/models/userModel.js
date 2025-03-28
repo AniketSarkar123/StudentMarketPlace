@@ -23,7 +23,7 @@ const addUser = async (username, usermail, password) => {
     balance: 100, // Default value
   };
 
-  await usersCollection.doc(userId.toString()).set(newUser);
+  await usersCollection.add(newUser);
   return newUser;
 };
 

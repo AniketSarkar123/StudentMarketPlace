@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useCart } from '../context/CartContext';
 
 // Helper to retrieve a cookie by name
@@ -13,13 +13,13 @@ function getCookie(name) {
 
 function Home() {
   const [items, setItems] = useState([]); // full list of items
-  const [filteredItems, setFilteredItems] = useState([]); // suggestions based on search query and filters
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     category: "",
     condition: "",
     grade: "",
     subject: "",
+    maxPrice: 1000, // Price slider filter
   });
   const [selectedItem, setSelectedItem] = useState(null); // detail view for one item
   const [reviewsVisibility, setReviewsVisibility] = useState({});
@@ -47,7 +47,6 @@ function Home() {
       .then((data) => {
         if (data.items) {
           setItems(data.items);
-          setFilteredItems(data.items);
         }
       })
       .catch((error) => {
@@ -56,54 +55,54 @@ function Home() {
       });
   }, []);
 
-  // Combined filtering function (name and extra filters)
-  const filterItems = (query, filters) => {
-    let updatedItems = items;
-    if (query.trim() !== "") {
-      updatedItems = updatedItems.filter((item) =>
-        item.name.toLowerCase().includes(query.toLowerCase())
-      );
-    }
-    if (filters.category.trim() !== "") {
-      updatedItems = updatedItems.filter((item) =>
-        item.category.toLowerCase().includes(filters.category.toLowerCase())
-      );
-    }
-    if (filters.condition.trim() !== "") {
-      updatedItems = updatedItems.filter((item) =>
-        item.condition.toLowerCase().includes(filters.condition.toLowerCase())
-      );
-    }
-    if (filters.grade.trim() !== "") {
-      updatedItems = updatedItems.filter((item) =>
-        item.grade.toLowerCase().includes(filters.grade.toLowerCase())
-      );
-    }
-    if (filters.subject.trim() !== "") {
-      updatedItems = updatedItems.filter((item) =>
-        item.subject.toLowerCase().includes(filters.subject.toLowerCase())
-      );
-    }
-    setFilteredItems(updatedItems);
+  // Compute filtered items inline from items, searchQuery, and filters.
+  const getFilteredItems = () => {
+    return items.filter((item) => {
+      // Use default empty string for each property if undefined.
+      if (searchQuery.trim() !== "" && !( (item.name || "").toLowerCase().includes(searchQuery.toLowerCase()))) {
+        return false;
+      }
+      if (filters.category.trim() !== "" && !( (item.category || "").toLowerCase().includes(filters.category.toLowerCase()))) {
+        return false;
+      }
+      if (filters.condition.trim() !== "" && !( (item.condition || "").toLowerCase().includes(filters.condition.toLowerCase()))) {
+        return false;
+      }
+      if (filters.grade.trim() !== "" && !( (item.grade || "").toLowerCase().includes(filters.grade.toLowerCase()))) {
+        return false;
+      }
+      if (filters.subject.trim() !== "" && !( (item.subject || "").toLowerCase().includes(filters.subject.toLowerCase()))) {
+        return false;
+      }
+      // Price filtering: only include items with price <= maxPrice
+      if (Number(item.price) > Number(filters.maxPrice)) {
+        return false;
+      }
+      return true;
+    });
   };
 
-  // Handlers for search and filter input changes
   const handleSearchChange = (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    filterItems(query, filters);
+    setSearchQuery(e.target.value);
   };
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    const newFilters = { ...filters, [name]: value };
-    setFilters(newFilters);
-    filterItems(searchQuery, newFilters);
+    setFilters((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handlePriceSliderChange = (e) => {
+    setFilters((prev) => ({
+      ...prev,
+      maxPrice: e.target.value,
+    }));
   };
 
   // Handler when a suggestion is clicked to render detail view
   const handleSuggestionClick = (itemId) => {
-    // Fetch item details using the GET route: /items/:id
     fetch(`http://localhost:3000/items/${itemId}`)
       .then((res) => res.json())
       .then((data) => {
@@ -123,18 +122,16 @@ function Home() {
   // Option to clear the detail view and return to the full grid
   const handleBackToList = () => {
     setSelectedItem(null);
-    setFilteredItems(items);
   };
 
-  // Toggle reviews for an item in grid view (only used when no item is selected)
-  const toggleReviews = (index) => {
+  // Toggle reviews for an item in grid view
+  const toggleReviews = (id) => {
     setReviewsVisibility((prev) => ({
       ...prev,
-      [index]: !prev[index],
+      [id]: !prev[id],
     }));
   };
 
-  // Render the search bar with additional filter fields
   const renderSearchBar = () => (
     <div style={{ padding: "10px", maxWidth: "600px", margin: "20px auto" }}>
       <input
@@ -204,7 +201,20 @@ function Home() {
           }}
         />
       </div>
-      {searchQuery || Object.values(filters).some((val) => val.trim() !== "") ? (
+      <div style={{ marginTop: "10px" }}>
+        <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>
+          Maximum Price: ${filters.maxPrice}
+        </label>
+        <input
+          type="range"
+          min="0"
+          max="1000"
+          value={filters.maxPrice}
+          onChange={handlePriceSliderChange}
+          style={{ width: "100%" }}
+        />
+      </div>
+      {(searchQuery || Object.values(filters).some(val => typeof val === "string" && val.trim() !== "")) && (
         <ul
           style={{
             listStyle: "none",
@@ -215,7 +225,7 @@ function Home() {
             borderRadius: "4px",
           }}
         >
-          {filteredItems.map((item) => (
+          {getFilteredItems().map((item) => (
             <li
               key={item.id}
               onClick={() => handleSuggestionClick(item.id)}
@@ -229,11 +239,10 @@ function Home() {
             </li>
           ))}
         </ul>
-      ) : null}
+      )}
     </div>
   );
 
-  // If an item is selected, render its detail view along with an Add to Cart button
   if (selectedItem) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -266,7 +275,6 @@ function Home() {
           <p className="mt-2"><strong>Grade:</strong> {selectedItem.grade}</p>
           <p className="mt-2"><strong>Subject:</strong> {selectedItem.subject}</p>
           <p className="mt-2"><strong>Price:</strong> ${selectedItem.price}</p>
-          {/* Add to Cart Button */}
           {ownerId && Number(ownerId) !== Number(selectedItem.owner_id) && (
             <button
               onClick={() => {
@@ -308,10 +316,8 @@ function Home() {
     );
   }
 
-  // Otherwise, render the home grid view
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {renderSearchBar()}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl">
           Welcome to StudentMarket
@@ -320,9 +326,10 @@ function Home() {
           The ultimate marketplace for students to buy, sell, and exchange academic materials, textbooks, and supplies.
         </p>
       </div>
+      {renderSearchBar()}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((item, index) => (
-          <div key={index} className="bg-white shadow rounded-lg overflow-hidden">
+        {getFilteredItems().map((item) => (
+          <div key={item.id} className="bg-white shadow rounded-lg overflow-hidden">
             {item.images && item.images.length > 0 && (
               <img
                 src={item.images[0]}
@@ -341,10 +348,10 @@ function Home() {
               <p className="text-gray-600">Price: ${item.price}</p>
               <div className="mt-4 flex justify-between">
                 <button
-                  onClick={() => toggleReviews(index)}
+                  onClick={() => toggleReviews(item.id)}
                   className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
                 >
-                  {reviewsVisibility[index] ? 'Hide Reviews' : 'Show Reviews'}
+                  {reviewsVisibility[item.id] ? 'Hide Reviews' : 'Show Reviews'}
                 </button>
                 {ownerId && Number(ownerId) === Number(item.owner_id) ? (
                   <button
@@ -370,20 +377,19 @@ function Home() {
                   </button>
                 )}
               </div>
-              {reviewsVisibility[index] && (
-                <div className="mt-4">
-                  <h3 className="text-lg font-semibold text-gray-700">Reviews</h3>
-                  {item.reviews && item.reviews.length > 0 ? (
-                    <ul className="list-disc list-inside">
-                      {item.reviews.map((review, i) => (
-                        <li key={i} className="text-gray-600">{review}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-600">No reviews yet.</p>
-                  )}
-                </div>
-              )}
+              {reviewsVisibility[item.id] && (
+  <div className="mt-4">
+    <h3 className="text-xl font-semibold">Reviews</h3>
+    <ul className="list-disc list-inside">
+      {item.reviews && item.reviews.length > 0 ? (
+        item.reviews.map((review, i) => (
+          <li key={i} className="mt-1">{review}</li>
+        ))
+      ) : (
+        <li className="mt-1">No reviews yet.</li>
+      )}
+    </ul>
+  </div>)}
             </div>
           </div>
         ))}
