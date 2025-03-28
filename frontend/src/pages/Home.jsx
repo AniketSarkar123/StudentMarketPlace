@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+
 // Helper to retrieve a cookie by name
 function getCookie(name) {
   const value = `; ${document.cookie}`;
@@ -100,7 +101,7 @@ function Home() {
     filterItems(searchQuery, newFilters);
   };
 
-  // Handler when a suggestion is clicked
+  // Handler when a suggestion is clicked to render detail view
   const handleSuggestionClick = (itemId) => {
     // Fetch item details using the GET route: /items/:id
     fetch(`http://localhost:3000/items/${itemId}`)
@@ -232,7 +233,7 @@ function Home() {
     </div>
   );
 
-  // If an item is selected, render its details
+  // If an item is selected, render its detail view along with an Add to Cart button
   if (selectedItem) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -265,6 +266,31 @@ function Home() {
           <p className="mt-2"><strong>Grade:</strong> {selectedItem.grade}</p>
           <p className="mt-2"><strong>Subject:</strong> {selectedItem.subject}</p>
           <p className="mt-2"><strong>Price:</strong> ${selectedItem.price}</p>
+          {/* Add to Cart Button */}
+          {ownerId && Number(ownerId) !== Number(selectedItem.owner_id) && (
+            <button
+              onClick={() => {
+                addItemToCart({
+                  name: selectedItem.name,
+                  quantity: 1,
+                  price: selectedItem.price,
+                  sellerId: selectedItem.owner_id,
+                });
+                toast.success("Added to cart successfully!");
+              }}
+              style={{
+                padding: "10px 20px",
+                marginTop: "20px",
+                border: "none",
+                background: "#28a745",
+                color: "#fff",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+            >
+              Add to Cart
+            </button>
+          )}
           {selectedItem.reviews && selectedItem.reviews.length > 0 ? (
             <div className="mt-4">
               <h3 className="text-xl font-semibold">Reviews</h3>
@@ -331,7 +357,6 @@ function Home() {
                   <button
                     className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
                     onClick={() => {
-                      // Add the item to the cart using context
                       addItemToCart({
                         name: item.name,
                         quantity: 1,
