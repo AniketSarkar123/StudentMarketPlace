@@ -1,4 +1,6 @@
 const express = require("express");
+const db = require("../config/firebase"); // Firestore instance
+
 const { addUser, loginUserByUsername, updateUser } = require("../models/userModel");
 
 const router = express.Router();
@@ -75,5 +77,50 @@ router.post("/email", async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+// New Route: Get balance for a given user ID
+router.get("/get_bal", async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+    const usersCollection = db.collection("users");
+    // Query by userId. Ensure the type matches (assuming userId is a number in Firestore)
+    const snapshot = await usersCollection.where("userId", "==", Number(userId)).get();
+    if (snapshot.empty) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const userDoc = snapshot.docs[0];
+    const balance = userDoc.data().balance;
+    return res.status(200).json({ balance });
+  } catch (error) {
+    console.error("Error fetching balance:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// New Route: Update balance for a given user ID by deducting a spent amount
+router.post("/update_bal", async (req, res) => {
+  try {
+    const { userId, spent } = req.body;
+    if (userId == null || spent == null) {
+      return res.status(400).json({ error: "User ID and spent amount are required" });
+    }
+    const usersCollection = db.collection("users");
+    const snapshot = await usersCollection.where("userId", "==", Number(userId)).get();
+    if (snapshot.empty) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const userDoc = snapshot.docs[0];
+    const currentBalance = userDoc.data().balance;
+    const newBalance = currentBalance - Number(spent);
+    await userDoc.ref.update({ balance: newBalance });
+    return res.status(200).json({ message: "Balance updated successfully", balance: newBalance });
+  } catch (error) {
+    console.error("Error updating balance:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 module.exports = router;

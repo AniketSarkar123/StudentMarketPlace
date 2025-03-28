@@ -3,6 +3,7 @@ const cors = require("cors");
 const cookieParser = require('cookie-parser');
 const userRoutes = require("./routes/users");
 const itemRoutes = require("./routes/items");
+const orderRoutes = require("./routes/orders");
 const app = express();
 
 
@@ -20,6 +21,7 @@ app.use(express.json()); // Middleware to parse JSON requests
 // Routes
 app.use("/users", userRoutes);
 app.use("/items", itemRoutes);
+app.use("/orders", orderRoutes);
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
