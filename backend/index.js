@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const userRoutes = require("./routes/users");
 const itemRoutes = require("./routes/items");
 const orderRoutes = require("./routes/orders");
+const emailRoutes = require("./routes/email");
 const app = express();
 
 // Middleware
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use("/users", userRoutes);
 app.use("/items", itemRoutes);
 app.use("/orders", orderRoutes);
+app.use("/email", emailRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

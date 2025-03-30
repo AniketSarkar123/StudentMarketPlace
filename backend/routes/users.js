@@ -96,7 +96,7 @@ router.post("/add_balance", async (req, res) => {
 router.get("/get_bal", async (req, res) => {
   try {
     const { userId } = req.query;
-    console.log(typeof(user));
+    // console.log(typeof(user));
     if (!userId) {
       return res.status(400).json({ error: "User ID is required in the request body" });
     }
