@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require('cookie-parser');
@@ -6,22 +7,20 @@ const itemRoutes = require("./routes/items");
 const orderRoutes = require("./routes/orders");
 const app = express();
 
-
-
+// Middleware
 app.use(cookieParser());
-
-const PORT = process.env.PORT || 3000;
-
 app.use(cors({
   origin: "http://localhost:5173",
   credentials: true,
 }));
-app.use(express.json()); // Middleware to parse JSON requests
+app.use(express.json());
 
 // Routes
 app.use("/users", userRoutes);
 app.use("/items", itemRoutes);
 app.use("/orders", orderRoutes);
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
