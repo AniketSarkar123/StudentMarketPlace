@@ -1,6 +1,8 @@
 const express = require("express");
 const db = require("../config/firebase"); // Firestore instance
 const { addItem, getAllItems, editItem } = require("../models/itemsModel"); // Not used here, but for reference
+const { sendEmail, sendHtmlEmail } = require("../utils/emailService");
+const { getUserEmailById } = require("../models/userModel");
 const router = express.Router();
 
 // Reference the "orders" collection in Firestore
@@ -40,6 +42,74 @@ router.post("/add", async (req, res) => {
     };
 
     const docRef = await ordersCollection.add(newOrder);
+
+    // Group items by seller_id
+    const sellerItemsMap = {};
+    newOrder.items.forEach(item => {
+      if (!sellerItemsMap[item.seller_id]) {
+        sellerItemsMap[item.seller_id] = [];
+      }
+      sellerItemsMap[item.seller_id].push(item);
+    });
+    // console.log(user_id);
+    const buyerEmail = await getUserEmailById(user_id);
+
+    // Send email to each seller with their respective order items
+    for (const sellerId in sellerItemsMap) {
+      // console.log(sellerId);
+      const sellerEmail = await getUserEmailById(sellerId);
+      if (sellerEmail) {
+        const itemDetails = sellerItemsMap[sellerId].map(item => 
+          `${item.item_name} (Quantity: ${item.quantity}, Price: ${item.price})`
+        ).join("\n");
+        const emailSubject = `New Order Received - Order #${order_id}`;
+        const emailContent = `
+Dear Seller,
+
+A new order has been placed that includes the following items for you:
+
+${itemDetails}
+
+Buyer Email: ${buyerEmail}
+Delivery Address: ${newOrder.delivery_address}
+Total Price: ${newOrder.total_price}
+
+Please process this order promptly.
+
+Best regards,
+Marketplace Team
+        `;
+        await sendEmail(sellerEmail, emailSubject, emailContent);
+      }
+    }
+
+    // Send order confirmation email to the buyer
+    if (buyerEmail) {
+      // Prepare a summary of the order for the buyer
+      const allItemDetails = newOrder.items.map(item =>
+        `${item.item_name} (Quantity: ${item.quantity}, Price: ${item.price})`
+      ).join("\n");
+      const buyerSubject = `Order Confirmation - Order #${order_id}`;
+      const buyerContent = `
+Dear Customer,
+
+Thank you for your order. Your order has been received successfully with the following details:
+
+Order ID: ${order_id}
+Delivery Address: ${newOrder.delivery_address}
+Total Price: ${newOrder.total_price}
+
+Items Ordered:
+${allItemDetails}
+
+We will notify you once your order is shipped.
+
+Best regards,
+Marketplace Team
+      `;
+      await sendEmail(buyerEmail, buyerSubject, buyerContent);
+    }
+
     return res.status(201).json({ message: "Order added successfully", order: { id: docRef.id, ...newOrder } });
   } catch (error) {
     console.error("Error adding order:", error);

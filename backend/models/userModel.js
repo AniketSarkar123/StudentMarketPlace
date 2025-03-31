@@ -84,5 +84,17 @@ const updateUser = async (userId, email, password, about) => {
 // userModel.js
 // ... existing code ...
 
-module.exports = { addUser, loginUserByUsername, updateUser, usersCollection: db.collection("users") };
+// Function to get the email for a given userId
+const getUserEmailById = async (userId) => {
+  const snapshot = await usersCollection.where("userId", "==", Number(userId)).get();
+  if (snapshot.empty) {
+    throw new Error("User not found");
+  }
+  // Assuming userIds are unique, return the email of the first matching document
+  const userDoc = snapshot.docs[0];
+  const user = userDoc.data();
+  return user.usermail;
+};
+
+module.exports = { addUser, loginUserByUsername, updateUser, getUserEmailById, usersCollection: db.collection("users") };
 

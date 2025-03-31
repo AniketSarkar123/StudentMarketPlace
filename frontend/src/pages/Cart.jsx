@@ -15,6 +15,7 @@ function Cart() {
   const { cart, removeItemFromCart, updateQuantity, clearCart } = useCart();
   const [orderMode, setOrderMode] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState('');
+  const navigate = useNavigate();
 
   // Calculate total price from cart items
   const totalPrice = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -47,7 +48,7 @@ function Cart() {
       return;
     }
     const user = JSON.parse(decodeURIComponent(rawUserInfo));
-    const navigate = useNavigate();
+
     if (user.balance < totalPrice) {
       toast.error("Insufficient balance to complete the order.");
       return;
