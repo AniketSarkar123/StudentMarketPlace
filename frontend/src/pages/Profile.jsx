@@ -258,7 +258,7 @@ function Profile() {
                   {orders.map((order) => (
                     <div key={order.id} className="p-4 border rounded">
                       <h5 className="text-lg font-bold">Order #{order.order_id}</h5>
-                      <p>Total: ${order.total_price}</p>
+                      <p>Total: Rs. {order.total_price}</p>
                       {order.delivery_address && <p>Delivery Address: {order.delivery_address}</p>}
                     </div>
                   ))}

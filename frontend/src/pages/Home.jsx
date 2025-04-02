@@ -345,7 +345,7 @@ function Home() {
               <p className="text-gray-600">Category: {item.category}</p>
               <p className="text-gray-600">Condition: {item.condition}</p>
               <p className="text-gray-600">Grade: {item.grade}</p>
-              <p className="text-gray-600">Price: ${item.price}</p>
+              <p className="text-gray-600">Price: Rs. {item.price}</p>
               <div className="mt-4 flex justify-between">
                 <button
                   onClick={() => toggleReviews(item.id)}
