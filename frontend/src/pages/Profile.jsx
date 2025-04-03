@@ -1,9 +1,8 @@
-//import { type } from 'os';
 import React, { useState, useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
-// Helper to get a cookie by name
+// Helper to retrieve a cookie by name
 function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -11,9 +10,9 @@ function getCookie(name) {
   return null;
 }
 
+// Helper: Fetch balance from backend given a userId (from query param)
 async function fetchBalance(userId) {
   try {
-    console.log(typeof(userId));
     const response = await fetch(`http://localhost:3000/users/get_bal?userId=${userId}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -25,6 +24,79 @@ async function fetchBalance(userId) {
     return 0;
   }
 }
+
+// StarRating Component: Fetches and displays seller's rating as stars.
+// It shows filled stars ("★") for selected rating and outlined stars ("☆") for the remainder.
+// When a star is clicked, that many stars are "lit" and can be submitted.
+const StarRating = ({ sellerId }) => {
+  const [rating, setRating] = useState(null);
+  const [selectedRating, setSelectedRating] = useState(0);
+
+  useEffect(() => {
+    async function fetchRating() {
+      try {
+        const response = await fetch(`http://localhost:3000/ratings/get?sellerId=${sellerId}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setRating(data.averageRating);
+          setSelectedRating(Math.round(data.averageRating));
+        } else {
+          setRating(0);
+          setSelectedRating(0);
+        }
+      } catch (error) {
+        console.error("Error fetching rating:", error);
+        setRating(0);
+        setSelectedRating(0);
+      }
+    }
+    fetchRating();
+  }, [sellerId]);
+
+  const submitRating = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/ratings/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sellerId, points: selectedRating }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error || "Error rating seller");
+      } else {
+        toast.success("Seller rated successfully!");
+      }
+    } catch (error) {
+      console.error("Error rating seller:", error);
+      toast.error("An error occurred while rating seller.");
+    }
+  };
+
+  if (rating === null) return <span>Loading rating...</span>;
+
+  return (
+    <div>
+      <div className="flex items-center">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span
+            key={star}
+            onClick={() => setSelectedRating(star)}
+            style={{ fontSize: "1.5rem", cursor: "pointer", marginRight: "5px" }}
+          >
+            {star <= selectedRating ? "★" : "☆"}
+          </span>
+        ))}
+        <button onClick={submitRating} className="ml-4 bg-blue-600 text-white px-4 py-2 rounded">
+          Submit Rating
+        </button>
+      </div>
+      <div className="text-sm text-gray-600">(Avg: {rating.toFixed(1)})</div>
+    </div>
+  );
+};
 
 function Profile() {
   const navigate = useNavigate();
@@ -51,13 +123,22 @@ function Profile() {
   // State for orders list
   const [orders, setOrders] = useState([]);
 
+  // State for rating: which seller we are rating (if needed, but here we show rating for each seller in each order)
+  // For this implementation, we'll render a StarRating component for every unique seller in an order.
+
+  // Load user info and orders on mount
+  useEffect(() => {
+    loadUserInfo();
+    loadOrders();
+  }, []);
+
   // Async function to load user info from cookie and update balance from backend
   async function loadUserInfo() {
     const rawUserInfo = getCookie('userInfo');
     if (rawUserInfo) {
       try {
         const parsed = JSON.parse(decodeURIComponent(rawUserInfo));
-        const fetchedBalance = await fetchBalance(Number(parsed.userId));
+        const fetchedBalance = await fetchBalance(parsed.userId);
         setUser({
           username: parsed.username || 'Unknown',
           email: parsed.usermail || 'No Email',
@@ -92,11 +173,6 @@ function Profile() {
       }
     }
   }
-
-  useEffect(() => {
-    loadUserInfo();
-    loadOrders();
-  }, []);
 
   // Handlers for edit mode
   const handleEditClick = () => {
@@ -140,7 +216,6 @@ function Profile() {
           about: newAbout,
         }));
         setEditMode(false);
-        // Optionally update the cookie
         document.cookie = `userInfo=${encodeURIComponent(
           JSON.stringify({ ...user, email: newEmail, about: newAbout })
         )}; path=/;`;
@@ -255,13 +330,28 @@ function Profile() {
                 <p className="text-lg text-gray-600 mt-2">No orders yet.</p>
               ) : (
                 <div className="mt-2 space-y-4">
-                  {orders.map((order) => (
-                    <div key={order.id} className="p-4 border rounded">
-                      <h5 className="text-lg font-bold">Order #{order.order_id}</h5>
-                      <p>Total: Rs. {order.total_price}</p>
-                      {order.delivery_address && <p>Delivery Address: {order.delivery_address}</p>}
-                    </div>
-                  ))}
+                  {orders.map((order) => {
+                    // Compute unique seller IDs for this order
+                    const uniqueSellerIds = [
+                      ...new Set(order.items.map((item) => item.seller_id)),
+                    ];
+                    return (
+                      <div key={order.id} className="p-4 border rounded">
+                        <h5 className="text-lg font-bold">Order #{order.order_id}</h5>
+                        <p>Total: Rs. {order.total_price}</p>
+                        {order.delivery_address && <p>Delivery Address: {order.delivery_address}</p>}
+                        <div className="mt-2">
+                          <h5 className="text-lg font-semibold">Rate Seller(s):</h5>
+                          {uniqueSellerIds.map((sellerId) => (
+                            <div key={sellerId} className="mt-2">
+                              <p className="text-sm">Seller ID: {sellerId}</p>
+                              <StarRating sellerId={sellerId} />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
               <button onClick={loadOrders} className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">

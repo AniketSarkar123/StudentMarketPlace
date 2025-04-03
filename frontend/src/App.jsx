@@ -12,6 +12,7 @@ import Cart from './pages/Cart.jsx'; // New Cart page
 import { CartProvider } from './context/CartContext'; // New Cart context provider
 import Delivery from './pages/Delivery.jsx';
 import Comments from './pages/Comments.jsx';
+import RequestItems from './pages/RequestItems.jsx';
 function App() {
   return (
     <CartProvider>
@@ -29,6 +30,7 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/delivery" element={<Delivery />} />
             <Route path="/comments" element={<Comments />} />
+            <Route path="/request" element={<RequestItems />} />
           </Routes>
           <Toaster position="bottom-right" />
         </div>

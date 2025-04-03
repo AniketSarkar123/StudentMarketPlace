@@ -11,6 +11,47 @@ function getCookie(name) {
   return null;
 }
 
+// SellerRating component: Fetches and displays seller's rating as stars
+function SellerRating({ sellerId }) {
+  const [rating, setRating] = useState(null);
+
+  useEffect(() => {
+    async function fetchRating() {
+      try {
+        const response = await fetch(`http://localhost:3000/ratings/get?sellerId=${sellerId}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setRating(data.averageRating);
+        } else {
+          setRating(0);
+        }
+      } catch (error) {
+        console.error("Error fetching rating:", error);
+        setRating(0);
+      }
+    }
+    fetchRating();
+  }, [sellerId]);
+
+  if (rating === null) return <span>Loading rating...</span>;
+
+  // Round rating to nearest integer for star display
+  const roundedRating = Math.round(rating);
+  return (
+    <div>
+      <span>
+        {Array.from({ length: 5 }, (_, i) =>
+          i < roundedRating ? "★" : "☆"
+        )}
+      </span>
+      <span className="ml-2 text-sm text-gray-600">({rating.toFixed(1)})</span>
+    </div>
+  );
+}
+
 function Home() {
   const [items, setItems] = useState([]); // full list of items
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,19 +100,19 @@ function Home() {
   const getFilteredItems = () => {
     return items.filter((item) => {
       // Use default empty string for each property if undefined.
-      if (searchQuery.trim() !== "" && !( (item.name || "").toLowerCase().includes(searchQuery.toLowerCase()))) {
+      if (searchQuery.trim() !== "" && !((item.name || "").toLowerCase().includes(searchQuery.toLowerCase()))) {
         return false;
       }
-      if (filters.category.trim() !== "" && !( (item.category || "").toLowerCase().includes(filters.category.toLowerCase()))) {
+      if (filters.category.trim() !== "" && !((item.category || "").toLowerCase().includes(filters.category.toLowerCase()))) {
         return false;
       }
-      if (filters.condition.trim() !== "" && !( (item.condition || "").toLowerCase().includes(filters.condition.toLowerCase()))) {
+      if (filters.condition.trim() !== "" && !((item.condition || "").toLowerCase().includes(filters.condition.toLowerCase()))) {
         return false;
       }
-      if (filters.grade.trim() !== "" && !( (item.grade || "").toLowerCase().includes(filters.grade.toLowerCase()))) {
+      if (filters.grade.trim() !== "" && !((item.grade || "").toLowerCase().includes(filters.grade.toLowerCase()))) {
         return false;
       }
-      if (filters.subject.trim() !== "" && !( (item.subject || "").toLowerCase().includes(filters.subject.toLowerCase()))) {
+      if (filters.subject.trim() !== "" && !((item.subject || "").toLowerCase().includes(filters.subject.toLowerCase()))) {
         return false;
       }
       // Price filtering: only include items with price <= maxPrice
@@ -346,6 +387,7 @@ function Home() {
               <p className="text-gray-600">Condition: {item.condition}</p>
               <p className="text-gray-600">Grade: {item.grade}</p>
               <p className="text-gray-600">Price: Rs. {item.price}</p>
+              <SellerRating sellerId={item.owner_id} />
               <div className="mt-4 flex justify-between">
                 <button
                   onClick={() => toggleReviews(item.id)}
@@ -377,19 +419,6 @@ function Home() {
                   </button>
                 )}
               </div>
-              {reviewsVisibility[item.id] && (
-  <div className="mt-4">
-    <h3 className="text-xl font-semibold">Reviews</h3>
-    <ul className="list-disc list-inside">
-      {item.reviews && item.reviews.length > 0 ? (
-        item.reviews.map((review, i) => (
-          <li key={i} className="mt-1">{review}</li>
-        ))
-      ) : (
-        <li className="mt-1">No reviews yet.</li>
-      )}
-    </ul>
-  </div>)}
             </div>
           </div>
         ))}

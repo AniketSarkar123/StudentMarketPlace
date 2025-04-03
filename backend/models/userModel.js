@@ -1,6 +1,6 @@
+const bcrypt = require("bcryptjs");
 const db = require("../config/firebase");
 
-// Firestore collection reference
 const usersCollection = db.collection("users");
 
 // Function to get the next auto-incremented userId
@@ -12,21 +12,24 @@ const getNextUserId = async () => {
   return snapshot.docs[0].data().userId + 1;
 };
 
-// Function to add a new user
+// Function to add a new user with hashed password
 const addUser = async (username, usermail, password) => {
-  const userId = await getNextUserId(); // Auto-increment userId
+  const userId = await getNextUserId();
+  const hashedPassword = await bcrypt.hash(password, 10); // Hash the password with a salt factor of 10
+
   const newUser = {
     userId,
     username,
     usermail,
-    password,
-    balance: 100, // Default value
+    password: hashedPassword, // Store the hashed password
+    balance: 100, // Default balance
   };
 
   await usersCollection.add(newUser);
   return newUser;
 };
 
+// Function to log in a user by username
 const loginUserByUsername = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -36,53 +39,57 @@ const loginUserByUsername = async (req, res) => {
       return res.status(400).json({ error: "Username and password are required" });
     }
 
-    // Query the Firestore collection for a document with the given username
+    // Query Firestore for the user
     const snapshot = await usersCollection.where("username", "==", username).get();
 
-    // If no user found, return an error
     if (snapshot.empty) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Assuming usernames are unique, get the first matching document
+    // Get user data
     const userDoc = snapshot.docs[0];
     const user = userDoc.data();
 
-    // Verify password
-    if (user.password !== password) {
+    // Compare the provided password with the hashed password stored in Firestore
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
       return res.status(401).json({ error: "Incorrect password" });
     }
 
-    // Set a cookie with all user information (converted to a JSON string)
-    res.cookie("userInfo", JSON.stringify(user), { httpOnly: false });
+    // Remove password before storing in cookie
+    const userWithoutPassword = { ...user };
+    delete userWithoutPassword.password;
 
-    // Respond with a success message and the user data
-    return res.status(200).json({ message: "Login successful", user });
+    // Set cookie with user info
+    res.cookie("userInfo", JSON.stringify(userWithoutPassword), { httpOnly: false });
+
+    return res.status(200).json({ message: "Login successful", user: userWithoutPassword });
   } catch (error) {
     console.error("Error during login:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
 
-// New function to update a user's email, password, and optionally about
+// Function to update a user's email, password (hashed), and optionally about field
 const updateUser = async (userId, email, password, about) => {
   const userRef = usersCollection.doc(userId.toString());
-  const updateData = { 
-    usermail: email,   // updating the email field (using the same field name as in addUser)
-    password 
-  };
+
+  const updateData = { usermail: email };
+
+  // Hash the new password before storing it
+  if (password) {
+    updateData.password = await bcrypt.hash(password, 10);
+  }
+
   // Optionally update the about field if provided
   if (about !== undefined) {
     updateData.about = about;
   }
+
   await userRef.update(updateData);
   const updatedDoc = await userRef.get();
   return updatedDoc.data();
 };
-
-// 
-// userModel.js
-// ... existing code ...
 
 // Function to get the email for a given userId
 const getUserEmailById = async (userId) => {
@@ -90,11 +97,9 @@ const getUserEmailById = async (userId) => {
   if (snapshot.empty) {
     throw new Error("User not found");
   }
-  // Assuming userIds are unique, return the email of the first matching document
+
   const userDoc = snapshot.docs[0];
-  const user = userDoc.data();
-  return user.usermail;
+  return userDoc.data().usermail;
 };
 
-module.exports = { addUser, loginUserByUsername, updateUser, getUserEmailById, usersCollection: db.collection("users") };
-
+module.exports = { addUser, loginUserByUsername, updateUser, getUserEmailById, usersCollection };

@@ -70,6 +70,17 @@ function Delivery() {
     }
   };
 
+  const handleCopy = () => {
+    if (shareableLink) {
+      navigator.clipboard.writeText(shareableLink).then(() => {
+        toast.success("Link copied to clipboard!");
+      }).catch((error) => {
+        console.error("Error copying link:", error);
+        toast.error("Failed to copy link.");
+      });
+    }
+  };
+
   if (!position) return <div>Loading map...</div>;
 
   return (
@@ -95,7 +106,7 @@ function Delivery() {
           Generate Shareable Link
         </button>
         {shareableLink && (
-          <div className="mt-4">
+          <div className="mt-4 flex items-center space-x-2">
             <label className="block font-semibold mb-2">Shareable Link:</label>
             <input 
               type="text"
@@ -104,6 +115,9 @@ function Delivery() {
               onClick={(e) => e.target.select()}
               className="w-full p-2 border rounded"
             />
+            <button onClick={handleCopy} className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
+              Copy Link
+            </button>
           </div>
         )}
       </div>

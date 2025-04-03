@@ -6,6 +6,7 @@ const userRoutes = require("./routes/users");
 const itemRoutes = require("./routes/items");
 const orderRoutes = require("./routes/orders");
 const emailRoutes = require("./routes/email");
+const ratingRoutes = require("./routes/ratings");
 const app = express();
 
 // Middleware
@@ -21,7 +22,7 @@ app.use("/users", userRoutes);
 app.use("/items", itemRoutes);
 app.use("/orders", orderRoutes);
 app.use("/email", emailRoutes);
-
+app.use("/ratings",ratingRoutes);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

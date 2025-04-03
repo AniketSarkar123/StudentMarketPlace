@@ -8,8 +8,7 @@ router.post('/text', async (req, res) => {
     try {
         const result = await sendEmail(
             'arinjoypramanik6@gmail.com', // Replace with your email
-            'All Shades Freed',
-            'All good boys go to heaven but bad boys bring heaven to you'
+            
         );
         res.json({ success: true, messageId: result.messageId });
     } catch (error) {
