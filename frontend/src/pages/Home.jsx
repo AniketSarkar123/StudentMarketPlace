@@ -244,7 +244,7 @@ function Home() {
       </div>
       <div style={{ marginTop: "10px" }}>
         <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>
-          Maximum Price: ${filters.maxPrice}
+          Maximum Price: Rs. {filters.maxPrice}
         </label>
         <input
           type="range"

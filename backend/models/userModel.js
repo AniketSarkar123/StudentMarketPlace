@@ -71,12 +71,37 @@ const loginUserByUsername = async (req, res) => {
 };
 
 // Function to update a user's email, password (hashed), and optionally about field
-const updateUser = async (userId, email, password, about) => {
-  const userRef = usersCollection.doc(userId.toString());
+// const updateUser = async (userId, email, password, about) => {
+//   const userRef = usersCollection.doc(userId.toString());
 
+//   const updateData = { usermail: email };
+
+//   // Hash the new password before storing it
+//   if (password) {
+//     updateData.password = await bcrypt.hash(password, 10);
+//   }
+
+//   // Optionally update the about field if provided
+//   if (about !== undefined) {
+//     updateData.about = about;
+//   }
+
+//   await userRef.update(updateData);
+//   const updatedDoc = await userRef.get();
+//   return updatedDoc.data();
+// };
+
+const updateUser = async (userId, email, password, about) => {
+  // Query the collection for the document with matching userId field
+  const snapshot = await usersCollection.where("userId", "==", userId).get();
+  if (snapshot.empty) {
+    throw new Error("User not found");
+  }
+  const userDoc = snapshot.docs[0];
+  
   const updateData = { usermail: email };
 
-  // Hash the new password before storing it
+  // Hash the new password if provided
   if (password) {
     updateData.password = await bcrypt.hash(password, 10);
   }
@@ -86,10 +111,12 @@ const updateUser = async (userId, email, password, about) => {
     updateData.about = about;
   }
 
-  await userRef.update(updateData);
-  const updatedDoc = await userRef.get();
+  // Update the document using the found reference
+  await userDoc.ref.update(updateData);
+  const updatedDoc = await userDoc.ref.get();
   return updatedDoc.data();
 };
+
 
 // Function to get the email for a given userId
 const getUserEmailById = async (userId) => {
