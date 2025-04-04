@@ -69,7 +69,7 @@ function Comments() {
             <div key={item.name} className="mb-4 p-4 border rounded">
               <h2 className="text-xl font-bold">{item.name}</h2>
               <p>
-                Price: ${item.price} | Quantity: {item.quantity} | Seller ID: {item.sellerId}
+                Price: Rs. {item.price} | Quantity: {item.quantity} | Seller ID: {item.sellerId}
               </p>
               <input
                 type="text"
