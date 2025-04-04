@@ -11,8 +11,10 @@ function getCookie(name) {
 }
 
 function EditItem() {
+  const params = new URLSearchParams(location.search);
+  const paramName = params.get('name');
   const [formData, setFormData] = useState({
-    name: '',         // Identifier for the product to edit
+    name: paramName,         // Identifier for the product to edit
     category: '',
     condition: '',
     grade: '',
@@ -225,7 +227,7 @@ function EditItem() {
             type="text"
             name="name"
             value={formData.name}
-            onChange={handleChange}
+            
             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter product name to edit"
           />
