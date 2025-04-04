@@ -128,6 +128,29 @@ router.post("/donation", async (req, res) => {
   }
 });
 
+router.post("/inc_balance", async (req, res) => {
+  try {
+    const { userId, amount } = req.body;
+    if (amount == null) {
+      return res.status(400).json({ error: "Amount is required" });
+    }
+    
+    const usersCollection = db.collection("users");
+    // Query the user document by userId (assuming userId is stored as a number)
+    const snapshot = await usersCollection.where("userId", "==", Number(userId)).get();
+    if (snapshot.empty) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const userDoc = snapshot.docs[0];
+    const currentBalance = userDoc.data().balance || 0;
+    const newBalance = currentBalance + Number(amount);
+    await userDoc.ref.update({ balance: newBalance });
+    return res.status(200).json({ message: "Balance updated successfully", balance: newBalance });
+  } catch (error) {
+    console.error("Error updating balance:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 module.exports = router;
 

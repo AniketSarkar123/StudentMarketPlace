@@ -111,6 +111,31 @@ function Cart() {
         toast.error(balanceResult.error || "Error updating balance");
         return;
       }
+
+      // Increment the order total using the update balance endpoint.
+      const sellerTotals = {};
+      cart.forEach(item => {
+        sellerTotals[item.sellerId] = (sellerTotals[item.sellerId] || 0) + (item.price * item.quantity);
+      });
+
+      // Update balance for each seller
+      for (const sellerId in sellerTotals) {
+        const sellerAmount = sellerTotals[sellerId];
+        const balanceResponseSeller = await fetch("http://localhost:3000/users/inc_balance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            userId: sellerId,
+            amount: Number(sellerAmount) 
+          })
+        });
+        const balanceResultSeller = await balanceResponseSeller.json();
+        if (!balanceResponseSeller.ok) {
+          toast.error(balanceResultSeller.error || `Error updating balance for seller ${sellerId}`);
+          return;
+        }
+      }
   
       // Mark all items in the cart as unavailable using the new route
       const names = cart.map(item => item.name);
@@ -163,9 +188,9 @@ function Cart() {
                   -
                 </button>
                 <span className="px-3">{item.quantity}</span>
-                <button onClick={() => handleIncrement(item)} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-1 px-3 rounded-r">
+                {/* <button onClick={() => handleIncrement(item)} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-1 px-3 rounded-r">
                   +
-                </button>
+                </button> */}
               </div>
             </div>
             <button onClick={() => removeItemFromCart({ name: item.name, sellerId: item.sellerId })} className="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded">
