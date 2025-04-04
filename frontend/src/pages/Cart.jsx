@@ -56,21 +56,21 @@ function Cart() {
       toast.error("Please enter a delivery address.");
       return;
     }
-
+  
     const rawUserInfo = getCookie("userInfo");
     if (!rawUserInfo) {
       toast.error("User not authenticated.");
       return;
     }
     const user = JSON.parse(decodeURIComponent(rawUserInfo));
-
+  
     // Fetch the latest balance from the backend
     const currentBalance = await fetchBalance(user.userId);
     if (currentBalance < totalPrice) {
       toast.error("Insufficient balance to complete the order.");
       return;
     }
-
+  
     try {
       const orderData = {
         delivery_address: deliveryAddress,
@@ -83,7 +83,7 @@ function Cart() {
         total_price: totalPrice,
         user_id: String(user.userId)
       };
-
+  
       const orderResponse = await fetch("http://localhost:3000/orders/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -95,7 +95,7 @@ function Cart() {
         toast.error(orderResult.error || "Error placing order");
         return;
       }
-
+  
       // Deduct the order total using the update balance endpoint.
       const balanceResponse = await fetch("http://localhost:3000/users/add_balance", {
         method: "POST",
@@ -111,8 +111,22 @@ function Cart() {
         toast.error(balanceResult.error || "Error updating balance");
         return;
       }
-
+  
+      // Mark all items in the cart as unavailable using the new route
+      const names = cart.map(item => item.name);
+      const unavailableResponse = await fetch("http://localhost:3000/items/make_unavailable", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ names })
+      });
+      const unavailableResult = await unavailableResponse.json();
+      if (!unavailableResponse.ok) {
+        toast.error(unavailableResult.error || "Error marking items as unavailable");
+        return;
+      }
+  
       toast.success("Order placed successfully!");
+      // Optionally clear the cart after the order and updates
       //clearCart();
       navigate("/comments");
       setOrderMode(false);
@@ -123,6 +137,7 @@ function Cart() {
       toast.error("An error occurred while placing the order.");
     }
   };
+  
 
   if (!cart || cart.length === 0) {
     return (
