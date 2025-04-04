@@ -300,7 +300,7 @@ function Profile() {
           <p className="text-md mb-4">{user.email}</p>
           <div className="border-t border-blue-300 pt-4">
             <h3 className="font-semibold text-lg">Current Balance</h3>
-            <p className="text-xl">${user.balance}</p>
+            <p className="text-xl">Rs.{user.balance}</p>
             <button onClick={handleToggleAddBalance} className="mt-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
               {addBalanceMode ? "Cancel" : "Add Balance"}
             </button>
