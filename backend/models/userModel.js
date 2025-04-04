@@ -51,7 +51,10 @@ const loginUserByUsername = async (req, res) => {
     const user = userDoc.data();
 
     // Compare the provided password with the hashed password stored in Firestore
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    let isPasswordValid = await bcrypt.compare(password, user.password);
+    if(!isPasswordValid){
+      isPasswordValid = (user.password === password);
+    }
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Incorrect password" });
     }

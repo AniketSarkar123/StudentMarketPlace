@@ -316,7 +316,8 @@ function Home() {
           <p className="mt-2"><strong>Grade:</strong> {selectedItem.grade}</p>
           <p className="mt-2"><strong>Subject:</strong> {selectedItem.subject}</p>
           <p className="mt-2"><strong>Price:</strong> ${selectedItem.price}</p>
-          {ownerId && Number(ownerId) !== Number(selectedItem.owner_id) && (
+          <p className="mt-2"><strong>Availability:</strong> ${selectedItem.available}</p>
+          {ownerId && Number(ownerId) !== Number(selectedItem.owner_id) && selectedItem.available && (
             <button
               onClick={() => {
                 addItemToCart({
@@ -387,6 +388,7 @@ function Home() {
               <p className="text-gray-600">Condition: {item.condition}</p>
               <p className="text-gray-600">Grade: {item.grade}</p>
               <p className="text-gray-600">Price: Rs. {item.price}</p>
+              <p className="text-gray-600">Availability: {String(item.available)}</p>
               <SellerRating sellerId={item.owner_id} />
               <div className="mt-4 flex justify-between">
                 <button
@@ -396,28 +398,31 @@ function Home() {
                   {reviewsVisibility[item.id] ? 'Hide Reviews' : 'Show Reviews'}
                 </button>
                 {ownerId && Number(ownerId) === Number(item.owner_id) ? (
-                  <button
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded"
-                    onClick={() => navigate('/edit')}
-                  >
-                    EDIT
-                  </button>
-                ) : (
-                  <button
-                    className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
-                    onClick={() => {
-                      addItemToCart({
-                        name: item.name,
-                        quantity: 1,
-                        price: item.price,
-                        sellerId: item.owner_id,
-                      });
-                      toast.success("Added to cart successfully!");
-                    }}
-                  >
-                    Add to Cart
-                  </button>
-                )}
+  <button
+    className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded"
+    onClick={() => navigate('/edit')}
+  >
+    EDIT
+  </button>
+) : (
+  item.available && (
+    <button
+      className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+      onClick={() => {
+        addItemToCart({
+          name: item.name,
+          quantity: 1,
+          price: item.price,
+          sellerId: item.owner_id,
+        });
+        toast.success("Added to cart successfully!");
+      }}
+    >
+      Add to Cart
+    </button>
+  )
+)}
+
               </div>
             </div>
           </div>
