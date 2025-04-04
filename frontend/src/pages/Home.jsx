@@ -400,7 +400,8 @@ function Home() {
                 {ownerId && Number(ownerId) === Number(item.owner_id) ? (
   <button
     className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded"
-    onClick={() => navigate('/edit')}
+    onClick={() => navigate(`/edit?name=${encodeURIComponent(item.name)}`
+)}
   >
     EDIT
   </button>
