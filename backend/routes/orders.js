@@ -72,7 +72,6 @@ ${itemDetails}
 
 Buyer Email: ${buyerEmail}
 Delivery Address: ${newOrder.delivery_address}
-Total Price: ${newOrder.total_price}
 
 Please process this order promptly.
 

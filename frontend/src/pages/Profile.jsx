@@ -152,6 +152,30 @@ function Profile() {
     }
   }
 
+  // Function to allow Charity account
+  const handleRequestDonation = async () => {
+    const rawUserInfo = getCookie('userInfo');
+    if (!rawUserInfo) {
+      toast.error("User not authenticated.");
+      return;
+    }
+    try {
+      const parsed = JSON.parse(decodeURIComponent(rawUserInfo));
+      const response = await fetch(`http://localhost:3000/users/donation?userId=${parsed.userId}`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success("Donation status ACTIVE");
+      } else {
+        toast.error(data.error || "Failed to update donation status");
+      }
+    } catch (error) {
+      console.error("Error setting donation status", error);
+      toast.error("An error occurred while setting donation status");
+    }
+  };
+
   // Function to load orders for the logged-in user using user_id as a query parameter
   async function loadOrders() {
     const rawUserInfo = getCookie('userInfo');
@@ -276,7 +300,7 @@ function Profile() {
           <p className="text-md mb-4">{user.email}</p>
           <div className="border-t border-blue-300 pt-4">
             <h3 className="font-semibold text-lg">Current Balance</h3>
-            <p className="text-xl">${user.balance}</p>
+            <p className="text-xl">Rs.{user.balance}</p>
             <button onClick={handleToggleAddBalance} className="mt-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
               {addBalanceMode ? "Cancel" : "Add Balance"}
             </button>
@@ -296,6 +320,9 @@ function Profile() {
             )}
             <button onClick={loadUserInfo} className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
               Refresh Profile
+            </button>
+            <button onClick={handleRequestDonation} className="mt-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">
+              Request Donation
             </button>
           </div>
         </div>

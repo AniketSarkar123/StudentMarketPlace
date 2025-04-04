@@ -1,18 +1,21 @@
 const express = require("express");
 const { sendEmail, sendHtmlEmail } = require("../utils/emailService");
+const { getUserEmailById } = require("../models/userModel");
 
 const router = express.Router();
 
 // Test plain text email
 router.post('/text', async (req, res) => {
     try {
-        const result = await sendEmail(
-            'arinjoypramanik6@gmail.com', // Replace with your email
-            
-        );
+        const { sellerId, subject, text } = req.body;
+        const sellerEmail = await getUserEmailById(sellerId);
+        if (!sellerEmail) {
+            throw new Error("Seller email not found");
+        }
+        const result = await sendEmail(sellerEmail, subject, text);
         res.json({ success: true, messageId: result.messageId });
     } catch (error) {
-        console.error('Test email failed:', error);
+        console.error('Error sending donation request email:', error);
         res.status(500).json({ error: error.message });
     }
 });

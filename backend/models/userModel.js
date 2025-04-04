@@ -132,4 +132,19 @@ const getUserEmailById = async (userId) => {
   return userDoc.data().usermail;
 };
 
-module.exports = { addUser, loginUserByUsername, updateUser, getUserEmailById, usersCollection };
+// Function to provide donation status
+const updateUserFlag = async (userId) => {
+  const snapshot = await usersCollection.where("userId", "==", Number(userId)).get();
+  if (snapshot.empty) {
+    throw new Error("User not found");
+  }
+  const userDoc = snapshot.docs[0];
+
+  await userDoc.ref.update({ flag: true });
+  
+  const updatedDoc = await userDoc.ref.get();
+  return updatedDoc.data();
+};
+
+
+module.exports = { addUser, loginUserByUsername, updateUser, getUserEmailById, updateUserFlag, usersCollection };

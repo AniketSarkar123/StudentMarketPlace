@@ -326,78 +326,182 @@ function AddItem() {
     }
   };
 
+  // return (
+  //   <div className="container mx-auto p-4">
+  //     <h1 className="text-2xl font-bold mb-4">Add New Item</h1>
+  //     <form onSubmit={handleSubmit} className="space-y-4">
+  //       <div>
+  //         <label className="block mb-1">Name</label>
+  //         <input
+  //           type="text"
+  //           name="name"
+  //           value={formData.name}
+  //           onChange={handleChange}
+  //           className="w-full p-2 border rounded"
+  //           placeholder="Enter product name"
+  //         />
+  //       </div>
+  //       <div>
+  //         <label className="block mb-1">Category</label>
+  //         <input
+  //           type="text"
+  //           name="category"
+  //           value={formData.category}
+  //           onChange={handleChange}
+  //           className="w-full p-2 border rounded"
+  //           placeholder="Enter category"
+  //         />
+  //       </div>
+  //       <div>
+  //         <label className="block mb-1">Condition</label>
+  //         <input
+  //           type="text"
+  //           name="condition"
+  //           value={formData.condition}
+  //           onChange={handleChange}
+  //           className="w-full p-2 border rounded"
+  //           placeholder="Enter condition"
+  //         />
+  //       </div>
+  //       <div>
+  //         <label className="block mb-1">Grade</label>
+  //         <input
+  //           type="text"
+  //           name="grade"
+  //           value={formData.grade}
+  //           onChange={handleChange}
+  //           className="w-full p-2 border rounded"
+  //           placeholder="Enter grade"
+  //         />
+  //       </div>
+  //       <div>
+  //         <label className="block mb-1">Subject</label>
+  //         <input
+  //           type="text"
+  //           name="subject"
+  //           value={formData.subject}
+  //           onChange={handleChange}
+  //           className="w-full p-2 border rounded"
+  //           placeholder="Enter subject"
+  //         />
+  //       </div>
+  //       <div>
+  //         <label className="block mb-1">Price</label>
+  //         <input
+  //           type="number"
+  //           name="price"
+  //           value={formData.price}
+  //           onChange={handleChange}
+  //           className="w-full p-2 border rounded"
+  //           placeholder="Enter price"
+  //         />
+  //       </div>
+  //       <div>
+  //         <label className="block mb-1">Images</label>
+  //         <input
+  //           id="images"
+  //           type="file"
+  //           name="images"
+  //           multiple
+  //           onChange={handleFileChange}
+  //           className="hidden"
+  //         />
+  //         <label
+  //           htmlFor="images"
+  //           className="cursor-pointer inline-block bg-blue-600 text-white py-2 px-4 rounded"
+  //         >
+  //           {selectedFiles.length > 0
+  //             ? `${selectedFiles.length} file(s) selected`
+  //             : 'Select Images'}
+  //         </label>
+  //       </div>
+  //       <button
+  //         type="submit"
+  //         disabled={loading}
+  //         className={`bg-blue-600 text-white py-2 px-4 rounded ${
+  //           loading ? 'opacity-50 cursor-not-allowed' : ''
+  //         }`}
+  //       >
+  //         {loading ? 'Adding...' : 'Add Item'}
+  //       </button>
+  //     </form>
+  //   </div>
+  // );
+
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Add New Item</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-md mt-10">
+      <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Add New Item</h1>
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block mb-1">Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter product name"
           />
         </div>
         <div>
-          <label className="block mb-1">Category</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
           <input
             type="text"
             name="category"
             value={formData.category}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter category"
           />
         </div>
         <div>
-          <label className="block mb-1">Condition</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Condition</label>
           <input
             type="text"
             name="condition"
             value={formData.condition}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter condition"
           />
         </div>
-        <div>
-          <label className="block mb-1">Grade</label>
-          <input
-            type="text"
-            name="grade"
-            value={formData.grade}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            placeholder="Enter grade"
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Grade</label>
+            <input
+              type="text"
+              name="grade"
+              value={formData.grade}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter grade"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+            <input
+              type="text"
+              name="subject"
+              value={formData.subject}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter subject"
+            />
+          </div>
         </div>
         <div>
-          <label className="block mb-1">Subject</label>
-          <input
-            type="text"
-            name="subject"
-            value={formData.subject}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            placeholder="Enter subject"
-          />
-        </div>
-        <div>
-          <label className="block mb-1">Price</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
           <input
             type="number"
             name="price"
             value={formData.price}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter price"
           />
         </div>
         <div>
-          <label className="block mb-1">Images</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Images</label>
           <input
             id="images"
             type="file"
@@ -408,12 +512,24 @@ function AddItem() {
           />
           <label
             htmlFor="images"
-            className="cursor-pointer inline-block bg-blue-600 text-white py-2 px-4 rounded"
+            className="cursor-pointer inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
           >
             {selectedFiles.length > 0
-              ? `${selectedFiles.length} file(s) selected`
+              ? `${selectedFiles.length} file selected`
               : 'Select Images'}
           </label>
+          {selectedFiles.length > 0 && (
+            <div className="mt-4 flex gap-4 flex-wrap">
+              {selectedFiles.map((file, index) => (
+                <img
+                  key={index}
+                  src={URL.createObjectURL(file)}
+                  alt={`Preview ${index}`}
+                  className="h-32 w-32 object-cover rounded border border-gray-300"
+                />
+              ))}
+            </div>
+          )}
         </div>
         <button
           type="submit"
