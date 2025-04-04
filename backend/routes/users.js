@@ -3,7 +3,7 @@
 
 const express = require("express");
 const db = require("../config/firebase"); // Firestore instance
-const { addUser, loginUserByUsername, updateUser } = require("../models/userModel");
+const { addUser, loginUserByUsername, updateUser, updateUserFlag } = require("../models/userModel");
 
 const router = express.Router();
 
@@ -110,6 +110,20 @@ router.get("/get_bal", async (req, res) => {
     return res.status(200).json({ balance });
   } catch (error) {
     console.error("Error fetching balance:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/donation", async (req, res) => {
+  try {
+    const { userId } = req.query;
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required in the request body" });
+    }
+    updateUserFlag(userId);
+    return res.status(200).json({ message: "User is eligible for donation request" });
+  } catch (error) {
+    console.error("Error setting donation status", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
