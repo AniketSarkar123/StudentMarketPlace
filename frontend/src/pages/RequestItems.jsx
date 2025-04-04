@@ -40,9 +40,44 @@ function RequestItems() {
   }, []);
 
   const handleRequest = (item) => {
-    setRequestedItems((prev) => ({ ...prev, [item.id]: true }));
-    toast.success(`User ${ownerId} has requested ${item.name} from Seller ${item.owner_id}`);
-    alert(`User ${ownerId} has requested "${item.name}" from Seller ${item.owner_id}. Seller ${item.owner_id} will contact you shortly for details.`);
+    const rawUserInfo = getCookie('userInfo');
+    if (rawUserInfo) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(rawUserInfo));
+        const isConfirmed = window.confirm(
+          `Do you want to request "${item.name}" for donation from Seller?`
+        );
+        if (!isConfirmed) return;
+        setRequestedItems((prev) => ({ ...prev, [item.id]: true }));
+        const emailPayload = {
+          sellerId: item.owner_id,
+          subject: `Donation Request for ${item.name}`,
+          text: `User ${parsed.username} (Email: ${parsed.usermail}) is requesting the donation of "${item.name}" priced at Rs. ${item.price}. Please contact them for further details.`,
+        };
+        fetch("http://localhost:3000/email/text", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(emailPayload),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              toast.success(`Request sent! Seller ${item.owner_id} will contact you soon.`);
+              alert(`Your DONATION request for "${item.name}" has been sent to Seller. They will contact you shortly.`);
+            } else {
+              toast.error("Error sending request email.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error sending email:", error);
+            toast.error("An error occurred while sending the request email.");
+          });
+      } catch (error) {
+        console.error('Error parsing userInfo cookie:', error);
+      }
+    }
+    // toast.success(`User ${ownerId} has requested ${item.name} from Seller ${item.owner_id}`);
+    // alert(`User ${ownerId} has requested "${item.name}" from Seller ${item.owner_id}. Seller ${item.owner_id} will contact you shortly for details.`);
   };
 
   return (
