@@ -66,7 +66,7 @@ A student-centric online marketplace inspired by platforms like Facebook Marketp
 - **Backend:** Node.js, Express.js
 - **Database & Storage:** Firebase Firestore & Firebase Storage
 - **Tools:** cookie-parser, react-hot-toast
-- **External APIs:** Google Maps API (or similar)
+- **External APIs:** OpenStreet API 
 
 ---
 
