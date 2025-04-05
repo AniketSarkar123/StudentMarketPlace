@@ -1,7 +1,8 @@
-🌟 Student Marketplace
+🌟 #Student Marketplace
+
 A student-centric online marketplace inspired by platforms like Facebook Marketplace. This web application enables students to buy and sell used items, rate sellers, coordinate deliveries, and even request donations. Built with Node.js, Express, React, and Firebase, it offers a modern, feature-rich experience tailored for the student community.
 
-📚 Table of Contents
+📚 #Table of Contents
 Overview
 
 Features
@@ -24,7 +25,7 @@ Contributing
 
 License
 
-🔍 Overview
+🔍 #Overview
 Student Marketplace is a dynamic platform where students can:
 
 Buy & Sell Used Items: Easily post, view, and purchase second-hand items.
@@ -37,7 +38,7 @@ Donation Requests: Request or offer items as donations.
 
 Advanced Search: Utilize search filters for quick and efficient item discovery.
 
-🚀 Features
+🚀 #Features
 User Authentication: Secure registration and login with cookie-based sessions.
 
 Item Management:
@@ -114,7 +115,7 @@ Tailwind CSS (or custom CSS)
 
 JavaScript (ES6+)
 
-Backend:
+#Backend:
 
 Node.js, Express.js
 
@@ -251,7 +252,7 @@ Log in a user.
 PUT /users/update:
 Update user details (email, password, optionally "about").
 
-🔥 Firebase Integration
+🔥 #Firebase Integration
 Firestore:
 All item and user data is stored in Firebase Firestore.
 
@@ -261,12 +262,12 @@ Item images are uploaded and stored in Firebase Storage.
 Configuration:
 Set up your Firebase project and service account credentials in config/firebase.js.
 
-🗺 Map & Location Integration
-The platform integrates a Map API (such as Google Maps API) to generate location links.
+🗺 #Map & Location Integration
+The platform integrates a Map API (#OpenStreet API) to generate location links.
 
 These links are shared with buyers to facilitate scheduling deliveries or meet-ups.
 
-🤝 Contributing
+🤝 #Contributing
 Contributions are welcome! To contribute:
 
 Fork the repository.
