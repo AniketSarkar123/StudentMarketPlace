@@ -1,8 +1,8 @@
-🌟 #Student Marketplace
+#🌟 Student Marketplace
 
 A student-centric online marketplace inspired by platforms like Facebook Marketplace. This web application enables students to buy and sell used items, rate sellers, coordinate deliveries, and even request donations. Built with Node.js, Express, React, and Firebase, it offers a modern, feature-rich experience tailored for the student community.
 
-📚 #Table of Contents
+#📚 Table of Contents
 Overview
 
 Features
@@ -25,7 +25,7 @@ Contributing
 
 License
 
-🔍 #Overview
+#🔍 Overview
 Student Marketplace is a dynamic platform where students can:
 
 Buy & Sell Used Items: Easily post, view, and purchase second-hand items.
@@ -38,7 +38,7 @@ Donation Requests: Request or offer items as donations.
 
 Advanced Search: Utilize search filters for quick and efficient item discovery.
 
-🚀 #Features
+#🚀 Features
 User Authentication: Secure registration and login with cookie-based sessions.
 
 Item Management:
